@@ -1,20 +1,21 @@
 package expencive.vk.com.recipes;
 
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import expencive.vk.com.recipes.models.Recipe;
 import expencive.vk.com.recipes.requests.RecipeApi;
 import expencive.vk.com.recipes.requests.ServiceGenerator;
 import expencive.vk.com.recipes.requests.responses.RecipeResponse;
-import expencive.vk.com.recipes.requests.responses.RecipeSearchResponse;
 import expencive.vk.com.recipes.util.Constants;
+import expencive.vk.com.recipes.viewmodels.RecipeListViewModel;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -22,20 +23,26 @@ import retrofit2.Response;
 
 public class RecipeListActivity extends BaseActivity {
     private static final String TAG = "RecipeListActivity";
+    private RecipeListViewModel mRecipeListVieModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
 
-        findViewById(R.id.test).setOnClickListener(new View.OnClickListener() {
+        mRecipeListVieModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
+
+       subscribeObservers();
+    }
+
+    private void subscribeObservers(){
+        mRecipeListVieModel.getRecipes().observe(this, new Observer<List<Recipe>>() {
             @Override
-            public void onClick(View v) {
-                testRetrofitRequest();
+            public void onChanged(List<Recipe> recipes) {
+
             }
         });
     }
-
     private void testRetrofitRequest() {
         RecipeApi recipeApi = ServiceGenerator.getRecipeApi();
 
