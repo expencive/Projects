@@ -5,10 +5,11 @@ import java.util.List;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import expencive.vk.com.recipes.models.Recipe;
+import expencive.vk.com.recipes.requests.RecipeApiClient;
 
 public class RecipeRepository {
     private static RecipeRepository instance;
-    private MutableLiveData<List<Recipe>> mRecipes;
+    private RecipeApiClient mRecipeApiClient;
 
     public static RecipeRepository getInstance() {
         if (instance == null) {
@@ -18,11 +19,12 @@ public class RecipeRepository {
     }
 
     private RecipeRepository(){
-        mRecipes = new MutableLiveData<>();
+        mRecipeApiClient = RecipeApiClient.getInstance();
+
 
     }
 
     public LiveData<List<Recipe>> getRecipes() {
-        return mRecipes;
+        return mRecipeApiClient.getRecipes();
     }
 }
