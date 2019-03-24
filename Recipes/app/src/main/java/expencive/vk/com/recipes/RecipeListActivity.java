@@ -2,6 +2,8 @@ package expencive.vk.com.recipes;
 
 
 import android.os.Bundle;
+import android.widget.SearchView;
+
 import java.util.List;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -34,7 +36,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
 
         initRecyclerView();
        subscribeObservers();
-       testRetrofitRequest();
+       initSearchView();
 
     }
 
@@ -59,15 +61,22 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         });
     }
 
-    private void searchRecipesApi(String query, int pageNumber){
 
-        mRecipeListVieModel.searchRecipesApi(query, pageNumber);
 
-    }
+    private void initSearchView(){
+        final androidx.appcompat.widget.SearchView searchView = findViewById(R.id.seach_view);
+        searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mRecipeListVieModel.searchRecipesApi(query, 1);
+                return false;
+            }
 
-    private void testRetrofitRequest() {
-        RecipeApi recipeApi = ServiceGenerator.getRecipeApi();
-        searchRecipesApi("chicken breast", 1);
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
 
     }
 
