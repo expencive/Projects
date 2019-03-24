@@ -10,6 +10,7 @@ import java.util.List;
 
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.RecyclerView;
 import expencive.vk.com.recipes.models.Recipe;
 import expencive.vk.com.recipes.requests.RecipeApi;
 import expencive.vk.com.recipes.requests.ServiceGenerator;
@@ -25,21 +26,19 @@ import retrofit2.Response;
 public class RecipeListActivity extends BaseActivity {
     private static final String TAG = "RecipeListActivity";
     private RecipeListViewModel mRecipeListVieModel;
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
 
+        mRecyclerView = findViewById(R.id.recipe_list);
+
         mRecipeListVieModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
 
        subscribeObservers();
-       findViewById(R.id.test).setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               testRetrofitRequest();
-           }
-       });
+
     }
 
     private void subscribeObservers(){
