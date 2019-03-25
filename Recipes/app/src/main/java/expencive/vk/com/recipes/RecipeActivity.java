@@ -9,7 +9,10 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import expencive.vk.com.recipes.models.Recipe;
+import expencive.vk.com.recipes.viewmodels.RecipeViewModel;
 
 public class RecipeActivity extends BaseActivity {
     private static final String TAG = "RecipeActivity";
@@ -19,6 +22,7 @@ public class RecipeActivity extends BaseActivity {
     private TextView mRecipeTitle, mRecipeRank;
     private LinearLayout mRecipeIngridientsContainer;
     private ScrollView mScrollView;
+    private RecipeViewModel mRecipeViewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -30,13 +34,35 @@ public class RecipeActivity extends BaseActivity {
         mRecipeIngridientsContainer = findViewById(R.id.ingredients_container);
         mScrollView = findViewById(R.id.parent);
 
+        mRecipeViewModel = ViewModelProviders.of(this).get(RecipeViewModel.class);
+
+        subscribeObservers();
         getIncomingIntent();
+
+
     }
 
     private void getIncomingIntent(){
         if (getIntent().hasExtra("recipe")){
             Recipe recipe = getIntent().getParcelableExtra("recipe");
             Log.d(TAG, "getIncomingIntent: " + recipe.getTitle());
+            mRecipeViewModel.searchRecipeById(recipe.getRecipe_id());
         }
+    }
+
+    private void subscribeObservers(){
+        mRecipeViewModel.getRecipe().observe(this, new Observer<Recipe>() {
+            @Override
+            public void onChanged(Recipe recipe) {
+                if (recipe!=null){
+                    Log.d(TAG, "onChanged: -------------------------");
+                    Log.d(TAG, "onChanged: " + recipe.getTitle());
+                    for (String ingridient: recipe.getIngredients()){
+                        Log.d(TAG, "onChanged: " + ingridient);
+
+                    }
+                }
+            }
+        });
     }
 }
