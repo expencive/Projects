@@ -15,6 +15,7 @@ import expencive.vk.com.recipes.models.Recipe;
 import expencive.vk.com.recipes.requests.RecipeApi;
 import expencive.vk.com.recipes.requests.ServiceGenerator;
 import expencive.vk.com.recipes.util.Testing;
+import expencive.vk.com.recipes.util.VerticalSpacingItemDecorator;
 import expencive.vk.com.recipes.viewmodels.RecipeListViewModel;
 
 
@@ -47,7 +48,11 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
     private  void  initRecyclerView(){
         mAdapter = new RecipeRecyclerAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
+        VerticalSpacingItemDecorator itemDecorator = new VerticalSpacingItemDecorator(30);
+        mRecyclerView.addItemDecoration(itemDecorator);
+
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
 
     }
 
