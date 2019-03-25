@@ -2,6 +2,7 @@ package expencive.vk.com.recipes;
 
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -11,6 +12,7 @@ import androidx.appcompat.widget.AppCompatImageView;
 import expencive.vk.com.recipes.models.Recipe;
 
 public class RecipeActivity extends BaseActivity {
+    private static final String TAG = "RecipeActivity";
 
     //UI components
     private AppCompatImageView mRecipeImage;
@@ -34,6 +36,7 @@ public class RecipeActivity extends BaseActivity {
     private void getIncomingIntent(){
         if (getIntent().hasExtra("recipe")){
             Recipe recipe = getIntent().getParcelableExtra("recipe");
+            Log.d(TAG, "getIncomingIntent: " + recipe.getTitle());
         }
     }
 }
