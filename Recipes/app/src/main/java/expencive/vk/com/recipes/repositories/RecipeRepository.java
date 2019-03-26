@@ -35,6 +35,10 @@ public class RecipeRepository {
         return mRecipeApiClient.getRecipe();
     }
 
+    public LiveData<Boolean> isRecipeRequestTimedOut() {
+        return mRecipeApiClient.isRecipeRequestTimedOut();
+    }
+
     public void searchRecipeById(String recipeId){
         mRecipeApiClient.searchRecipeById(recipeId);
     }
