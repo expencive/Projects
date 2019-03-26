@@ -75,9 +75,40 @@ public class RecipeActivity extends BaseActivity {
             public void onChanged(Boolean aBoolean) {
                 if (aBoolean && !mRecipeViewModel.didRetriveRecipe()){
                     Log.d(TAG, "onChanged: timed out");
+                    displayErrorScreen("Error retrieving data. Check network connection");
                 }
             }
         });
+    }
+
+    private void displayErrorScreen(String errorMessage){
+        mRecipeTitle.setText("Error retrievieng recipe...");
+        mRecipeRank.setText("");
+        TextView textView = new TextView(this);
+        if (!errorMessage.equals("")){
+            textView.setText(errorMessage);
+        } else{
+            textView.setText("Error");
+        }
+        textView.setTextSize(15);
+        textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        mRecipeIngridientsContainer.addView(textView);
+
+        RequestOptions requestOptions = new RequestOptions()
+                .placeholder(R.drawable.ic_launcher_background);
+
+        Glide.with(this)
+                .setDefaultRequestOptions(requestOptions)
+                .load(R.drawable.ic_launcher_background)
+                .into(mRecipeImage);
+
+        showParent();
+        showProgressBar(false);
+
+
+
+
     }
 
     private void setRecipeProperties(Recipe recipe){
