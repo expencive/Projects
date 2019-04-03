@@ -1,6 +1,7 @@
 package expencive.vk.com.recipes.util;
 
 import android.renderscript.Sampler;
+import android.util.Log;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ import expencive.vk.com.recipes.requests.responses.ApiResponse;
 // CacheObject: Type for the Resource data. (database cache)
 // RequestObject: Type for the API response. (network request)
 public abstract class NetworkBoundResource<CacheObject, RequestObject> {
+    private static final String TAG = "NetworkBoundResource";
 
     private AppExecutors appExecutors;
     private MediatorLiveData<Resource<CacheObject>> results = new MediatorLiveData<>();
@@ -46,6 +48,73 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
 
                         }
                     });
+                }
+            }
+        });
+
+    }
+
+    /**
+     * 1) observe local db
+     * 2) if <condition/> query the network
+     * 3) stop observing the local db
+     * 4) insert new data into local db
+     * 5) begin observing local db again to see the refreshed data from network
+     * @param dbSource
+     */
+
+    private void fetchFromNetwork(final LiveData<CacheObject> dbSource){
+        Log.d(TAG, "fetchFromNetwork: called");
+
+        //update livedata for loading status
+        results.addSource(dbSource, new Observer<CacheObject>() {
+            @Override
+            public void onChanged(CacheObject cacheObject) {
+                setValue(Resource.loading(cacheObject));
+            }
+        });
+
+        final LiveData<ApiResponse<RequestObject>> apiResponse = createCall();
+
+        results.addSource(apiResponse, new Observer<ApiResponse<RequestObject>>() {
+            @Override
+            public void onChanged(ApiResponse<RequestObject> requestObjectApiResponse) {
+                results.removeSource(dbSource);
+                results.removeSource(apiResponse);
+
+                /*
+                    3 cases:
+                       1) ApiSuccessResponse
+                       2) ApiErrorResponse
+                       3) ApiEmptyResponse
+                 */
+
+                if (requestObjectApiResponse instanceof ApiResponse.ApiSuccessResponse){
+                    Log.d(TAG, "onChanged: ApiSuccessResponse");
+                    appExecutors.diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            //save the response to the local db
+                            saveCallResult(null);
+
+                            appExecutors.mainThread().execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    results.addSource(loadFromDb(), new Observer<CacheObject>() {
+                                        @Override
+                                        public void onChanged(CacheObject cacheObject) {
+                                            setValue(Resource.success(cacheObject));
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+
+                }else if (requestObjectApiResponse instanceof ApiResponse.ApiEmptyResponse){
+
+                }else  if (requestObjectApiResponse instanceof ApiResponse.ApiErrorResponse){
+
                 }
             }
         });
