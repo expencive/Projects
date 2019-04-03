@@ -1,18 +1,63 @@
 package expencive.vk.com.recipes.util;
 
+import android.renderscript.Sampler;
+
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.Observer;
+import expencive.vk.com.recipes.AppExecutors;
 import expencive.vk.com.recipes.requests.responses.ApiResponse;
 
 // CacheObject: Type for the Resource data. (database cache)
 // RequestObject: Type for the API response. (network request)
 public abstract class NetworkBoundResource<CacheObject, RequestObject> {
 
+    private AppExecutors appExecutors;
     private MediatorLiveData<Resource<CacheObject>> results = new MediatorLiveData<>();
+
+    public NetworkBoundResource(AppExecutors appExecutors) {
+        this.appExecutors = appExecutors;
+        init();
+    }
+
+    private void init(){
+        //update livedata for loading status
+        results.setValue((Resource<CacheObject>) Resource.loading(null));
+
+        //observe Livedata source from local db
+        final LiveData<CacheObject> dbSource = loadFromDb();
+
+        results.addSource(dbSource, new Observer<CacheObject>() {
+            @Override
+            public void onChanged(CacheObject cacheObject) {
+                results.removeSource(dbSource);
+
+                if (shouldFetch(cacheObject)){
+                    //get data from network
+                }else {
+                    results.addSource(dbSource, new Observer<CacheObject>() {
+                        @Override
+                        public void onChanged(CacheObject cacheObject) {
+                            setValue(Resource.success(cacheObject));
+
+                        }
+                    });
+                }
+            }
+        });
+
+    }
+
+    private void setValue(Resource<CacheObject> newValue){
+        if (results.getValue() != newValue){
+            results.setValue(newValue);
+        }
+
+    }
 
     // Called to save the result of the API response into the database.
     @WorkerThread
