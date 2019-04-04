@@ -1,6 +1,7 @@
 package expencive.vk.com.recipes.repositories;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class RecipeRepository {
 
     private static RecipeRepository instance;
     private RecipeDao recipeDao;
+    private static final String TAG = "RecipeRepository";
 
     public static RecipeRepository getInstance(Context context){
         if(instance == null){
@@ -44,6 +46,29 @@ public class RecipeRepository {
 
             @Override
             public void saveCallResult(@NonNull RecipeSearchResponse item) {
+                if (item.getRecipes() !=null){//recipe list wiil be null if apikey is expired
+
+                    Recipe[] recipes = new Recipe[item.getRecipes().size()];
+
+                    int index = 0;
+
+                    for (long rowid: recipeDao.insertRecipes((Recipe[]) (item.getRecipes().toArray(recipes)))){
+                        if (rowid==-1){
+                            Log.d(TAG, "saveCallResult: CONFLICT... This recipe is already in the cache ");
+                            //if recipe already exist i dont want to set ingridients or timestamp because
+                            //they will be erased
+                            recipeDao.updateRecipe(
+                                    recipes[index].getRecipe_id(),
+                                    recipes[index].getTitle(),
+                                    recipes[index].getPublisher(),
+                                    recipes[index].getImage_url(),
+                                    recipes[index].getSocial_rank()
+                            );
+                        }
+                        index++;
+                    }
+
+                }
 
             }
 
