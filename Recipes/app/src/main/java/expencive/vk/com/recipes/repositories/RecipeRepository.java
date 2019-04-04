@@ -15,8 +15,10 @@ import expencive.vk.com.recipes.models.Recipe;
 import expencive.vk.com.recipes.persistence.RecipeDao;
 import expencive.vk.com.recipes.persistence.RecipeDatabase;
 import expencive.vk.com.recipes.requests.RecipeApiClient;
+import expencive.vk.com.recipes.requests.ServiceGenerator;
 import expencive.vk.com.recipes.requests.responses.ApiResponse;
 import expencive.vk.com.recipes.requests.responses.RecipeSearchResponse;
+import expencive.vk.com.recipes.util.Constants;
 import expencive.vk.com.recipes.util.NetworkBoundResource;
 import expencive.vk.com.recipes.util.Resource;
 
@@ -59,7 +61,11 @@ public class RecipeRepository {
             @NonNull
             @Override
             public LiveData<ApiResponse<RecipeSearchResponse>> createCall() {
-                return null;
+                return ServiceGenerator.getRecipeApi()
+                        .searchRecipe(
+                                Constants.API_KEY,
+                                query, String.valueOf(pageNumber)
+                        );
             }
 
         }.getAsLiveData();

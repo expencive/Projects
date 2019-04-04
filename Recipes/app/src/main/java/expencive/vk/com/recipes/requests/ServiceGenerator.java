@@ -1,6 +1,8 @@
 package expencive.vk.com.recipes.requests;
 
 import expencive.vk.com.recipes.util.Constants;
+import expencive.vk.com.recipes.util.LiveDataCallAdapter;
+import expencive.vk.com.recipes.util.LiveDataCallAdapterFactory;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -9,6 +11,7 @@ public class ServiceGenerator {
     private static Retrofit.Builder retrofitBuilder =
             new Retrofit.Builder()
                     .baseUrl(Constants.BASE_URL)
+                    .addCallAdapterFactory(new LiveDataCallAdapterFactory())
                     .addConverterFactory(GsonConverterFactory.create());
 
     private static Retrofit retrofit = retrofitBuilder.build();

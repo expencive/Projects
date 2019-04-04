@@ -1,5 +1,7 @@
 package expencive.vk.com.recipes.requests;
 
+import androidx.lifecycle.LiveData;
+import expencive.vk.com.recipes.requests.responses.ApiResponse;
 import expencive.vk.com.recipes.requests.responses.RecipeResponse;
 import expencive.vk.com.recipes.requests.responses.RecipeSearchResponse;
 import retrofit2.Call;
@@ -10,7 +12,7 @@ public interface RecipeApi {
 
     // SEARCH
     @GET("api/search")
-    Call<RecipeSearchResponse> searchRecipe(
+    LiveData<ApiResponse<RecipeSearchResponse>> searchRecipe(
             @Query("key") String key,
             @Query("q") String query,
             @Query("page") String page
@@ -18,7 +20,7 @@ public interface RecipeApi {
 
     // GET SPECIFIC RECIPE
     @GET("api/get")
-    Call<RecipeResponse> getRecipe(
+    LiveData<ApiResponse<RecipeSearchResponse>> getRecipe(
             @Query("key") String key,
             @Query("rId") String recipe_id
     );
