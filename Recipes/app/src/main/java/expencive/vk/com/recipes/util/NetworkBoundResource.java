@@ -40,6 +40,7 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
 
                 if (shouldFetch(cacheObject)){
                     //get data from network
+                    fetchFromNetwork(dbSource);
                 }else {
                     results.addSource(dbSource, new Observer<CacheObject>() {
                         @Override
@@ -78,7 +79,7 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
 
         results.addSource(apiResponse, new Observer<ApiResponse<RequestObject>>() {
             @Override
-            public void onChanged(ApiResponse<RequestObject> requestObjectApiResponse) {
+            public void onChanged(final ApiResponse<RequestObject> requestObjectApiResponse) {
                 results.removeSource(dbSource);
                 results.removeSource(apiResponse);
 
@@ -95,7 +96,7 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
                         @Override
                         public void run() {
                             //save the response to the local db
-                            saveCallResult(null);
+                            saveCallResult((RequestObject) processResponce((ApiResponse.ApiSuccessResponse)requestObjectApiResponse));
 
                             appExecutors.mainThread().execute(new Runnable() {
                                 @Override
@@ -112,13 +113,40 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
                     });
 
                 }else if (requestObjectApiResponse instanceof ApiResponse.ApiEmptyResponse){
+                    Log.d(TAG, "onChanged: ApiEmptyResponce");
+                    appExecutors.mainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            results.addSource(loadFromDb(), new Observer<CacheObject>() {
+                                @Override
+                                public void onChanged(CacheObject cacheObject) {
+                                    setValue(Resource.success(cacheObject));
+                                }
+                            });
+                        }
+                    });
 
                 }else  if (requestObjectApiResponse instanceof ApiResponse.ApiErrorResponse){
+                    Log.d(TAG, "onChanged: ApiErrorResponce");
+                    results.addSource(dbSource, new Observer<CacheObject>() {
+                        @Override
+                        public void onChanged(CacheObject cacheObject) {
+                            setValue(
+                                    Resource.error(
+                                            ((ApiResponse.ApiErrorResponse)requestObjectApiResponse).getErrorMessage(),
+                                            cacheObject)
+                            );
+                        }
+                    });
 
                 }
             }
         });
 
+    }
+
+    private CacheObject processResponce(ApiResponse.ApiSuccessResponse response){
+        return (CacheObject) response.getBody();
     }
 
     private void setValue(Resource<CacheObject> newValue){
