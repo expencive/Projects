@@ -65,7 +65,6 @@ public class RecipeRepository {
                                     recipes[index].getSocial_rank()
                             );
                         }
-                        
                         index++;
                     }
 
